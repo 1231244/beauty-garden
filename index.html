@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>BEAUTY GARDEN</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --_page: #f4f2ee; --_card: #ffffff; --_text: #1f2a22; --_hint: #6f7a72; --_accent: #4f7a5a; --_accent-text: #ffffff; --_line: #e4e0d8;
+    --page: var(--tg-theme-secondary-bg-color, var(--_page));
+    --card: var(--tg-theme-bg-color, var(--_card));
+    --text: var(--tg-theme-text-color, var(--_text));
+    --hint: var(--tg-theme-hint-color, var(--_hint));
+    --accent: var(--tg-theme-button-color, var(--_accent));
+    --accent-text: var(--tg-theme-button-text-color, var(--_accent-text));
+    --line: color-mix(in srgb, var(--hint) 25%, transparent);
+    --bad: #c0392b; --good: #2e7d4f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --_page: #121614; --_card: #1c221e; --_text: #eef2ef; --_hint: #9aa69e; --_accent: #7fb08a; --_accent-text: #0e1410; --bad: #ff7b6b; --good: #7fd19b; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--text); font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; }
+  h1 { font-size: 17px; letter-spacing: .18em; margin: 0; font-weight: 700; }
+  h2 { font-size: 17px; margin: 0 0 12px; }
+  .lang { display: flex; gap: 4px; }
+  .lang button { border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 8px; padding: 6px 10px; font-weight: 600; }
+  .lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  main { padding: 6px 12px 12px; max-width: 560px; margin: 0 auto; }
+  .card { background: var(--card); border-radius: 16px; padding: 16px; margin: 10px 0; }
+  .demo { text-align: center; font-size: 13px; color: var(--hint); }
+  .monthbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .monthbar b { text-transform: capitalize; }
+  .monthbar button { width: 44px; height: 44px; font-size: 22px; border-radius: 12px; border: 0; background: var(--card); color: var(--text); }
+  label { display: block; font-size: 14px; color: var(--hint); margin-bottom: 12px; }
+  input, select { display: block; width: 100%; margin-top: 4px; font: inherit; color: var(--text); background: var(--page);
+                  border: 1px solid var(--line); border-radius: 12px; padding: 12px; min-height: 48px; }
+  .row { display: flex; gap: 10px; } .row > * { flex: 1; min-width: 0; }
+  .btn { display: block; width: 100%; min-height: 52px; border: 0; border-radius: 14px; background: var(--accent); color: var(--accent-text);
+         font-family: inherit; font-weight: 600; font-size: 17px; margin-top: 4px; cursor: pointer; }
+  .btn.big { min-height: 64px; font-size: 18px; }
+  .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); margin-top: 8px; }
+  .btn:disabled, body.busy .btn { opacity: .5; }
+  .or { text-align: center; color: var(--hint); font-size: 14px; margin: 16px 0 10px; }
+  .hint { color: var(--hint); font-size: 14px; margin: 0 0 12px; }
+  .calc { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .bad { color: var(--bad); } .good { color: var(--good); }
+  .list { list-style: none; margin: 0; padding: 0; }
+  .list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .list li:first-child { border-top: 0; }
+  .sub { color: var(--hint); font-size: 13px; }
+  .icon { width: 44px; height: 44px; border: 0; background: transparent; font-size: 18px; cursor: pointer; }
+  .empty { color: var(--hint); text-align: center; margin: 8px 0; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { background: var(--page); border-radius: 12px; padding: 12px; }
+  .stat .v { font-size: 20px; font-weight: 700; margin-top: 2px; }
+  .stat.wide { grid-column: 1 / -1; }
+  nav { position: fixed; left: 0; right: 0; bottom: 0; display: flex; background: var(--card); border-top: 1px solid var(--line);
+        padding-bottom: env(safe-area-inset-bottom); }
+  nav button { flex: 1; min-height: 64px; border: 0; background: none; color: var(--hint); font-family: inherit; font-weight: 600; font-size: 12px; line-height: 1.2; padding: 6px 2px; cursor: pointer; }
+  nav button span { display: block; font-size: 22px; margin-bottom: 2px; }
+  nav button[aria-current="page"] { color: var(--accent); }
+  #toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--text);
+           color: var(--card); padding: 10px 16px; border-radius: 12px; font-size: 15px; opacity: 0; pointer-events: none; transition: opacity .2s;
+           max-width: 90vw; text-align: center; }
+  #toast.show { opacity: 1; }
+  .center { text-align: center; padding: 40px 16px; }
+  .center a { display: block; margin: 10px auto; max-width: 320px; text-decoration: none; text-align: center; line-height: 52px; }
+</style>
+</head>
+<body>
+<header><h1>BEAUTY GARDEN</h1><div class="lang" id="lang"></div></header>
+<main id="app"><p class="center">…</p></main>
+<nav id="tabs" hidden></nav>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+// Адрес Web App из Apps Script (Развернуть → Веб-приложение), заканчивается на /exec
+const API_URL = 'https://script.google.com/macros/s/AKfycbwWUZA10EJNhQsSNl3P9IPceaV295OtUP6Z3lEmx_d_OhQa0oh_-PGaWstJiD5JJ_8o/exec';
+
+const tg = window.Telegram && window.Telegram.WebApp;
+const IN_TG = !!(tg && tg.initData);
+const Q = new URLSearchParams(location.search);
+const DEMO = !IN_TG && ['owner', 'worker'].includes(Q.get('demo')) ? Q.get('demo') : null;
+const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+// ---------- Словарь ----------
+const T = {
+  uk: {
+    shift: 'Зміна', services: 'Послуги', cash: 'Каса', month: 'Мій місяць', overview: 'Огляд', workers: 'Працівниці', cashList: 'Каси',
+    newShift: 'Зміна', editShift: 'Редагування зміни', schedule: 'Графік', dayOff: 'вихідний',
+    workedBySchedule: 'Відпрацювала за графіком ✅', ownTime: 'або вкажіть свій час', start: 'Початок', end: 'Кінець',
+    date: 'Дата', save: 'Зберегти', cancel: 'Скасувати', hours: 'Годин', h: 'год',
+    newService: 'Нова клієнтка', editService: 'Редагування послуги', service: 'Послуга', price: 'Ціна, zł',
+    newCash: 'Закриття каси', editCash: 'Редагування каси', cashIn: 'Готівка', card: 'Карта', blik: 'BLIK',
+    expenses: 'Витрати з каси', expNote: 'На що витрати', actual: 'Фактично в касі', expected: 'Має бути',
+    diff: 'Різниця', shortage: 'Нестача', surplus: 'Надлишок', ok: 'Все сходиться',
+    clients: 'Клієнток', sum: 'Сума послуг', pay: 'Зарплата', earned: 'Заробіток', rate: 'Ставка', perHour: 'zł/год',
+    revenue: 'Виручка', payroll: 'Зарплати разом', closedBy: 'Закрила', total: 'Разом',
+    edit: 'Змінити', del: 'Видалити', confirmDelete: 'Видалити цей запис?', saved: 'Збережено ✅', deleted: 'Видалено',
+    empty: 'Поки немає записів', demo: 'Демо-режим: вигадані дані, нічого не зберігається',
+    openInTg: 'Відкрийте застосунок через бота в Telegram.', demoOwner: 'Демо: власниця', demoWorker: 'Демо: працівниця',
+    prevMonth: 'Попередній місяць', nextMonth: 'Наступний місяць', locked: 'Змінити можна лише в день запису',
+    err_auth: 'Не вдалося перевірити вхід. Закрийте і відкрийте застосунок знову.', err_auth_expired: 'Сесія застаріла. Закрийте і відкрийте застосунок знову.',
+    err_not_registered: 'Вас немає у списку. Передайте власниці свій Telegram ID: {id}', err_forbidden: 'Немає доступу',
+    err_edit_closed: 'Змінити можна лише в день запису. Зверніться до власниці.', err_shift_exists: 'Зміна на цю дату вже є. Виправте її у списку нижче.',
+    err_cash_exists: 'Каса на цю дату вже закрита', err_bad_input: 'Перевірте заповнені поля', err_not_found: 'Запис не знайдено, оновіть сторінку',
+    err_network: 'Немає зв’язку з сервером. Перевірте інтернет.', err_server_config: 'Сервер не налаштований (BOT_TOKEN)',
+    err_no_sheet: 'У таблиці немає потрібного листа. Запустіть setup.', err_server: 'Помилка сервера. Спробуйте ще раз.',
+  },
+  pl: {
+    shift: 'Zmiana', services: 'Usługi', cash: 'Kasa', month: 'Mój miesiąc', overview: 'Przegląd', workers: 'Pracownice', cashList: 'Kasy',
+    newShift: 'Zmiana', editShift: 'Edycja zmiany', schedule: 'Grafik', dayOff: 'wolne',
+    workedBySchedule: 'Przepracowałam wg grafiku ✅', ownTime: 'lub wpisz własne godziny', start: 'Początek', end: 'Koniec',
+    date: 'Data', save: 'Zapisz', cancel: 'Anuluj', hours: 'Godzin', h: 'godz.',
+    newService: 'Nowa klientka', editService: 'Edycja usługi', service: 'Usługa', price: 'Cena, zł',
+    newCash: 'Zamknięcie kasy', editCash: 'Edycja kasy', cashIn: 'Gotówka', card: 'Karta', blik: 'BLIK',
+    expenses: 'Wydatki z kasy', expNote: 'Na co wydatki', actual: 'Faktycznie w kasie', expected: 'Powinno być',
+    diff: 'Różnica', shortage: 'Manko', surplus: 'Nadwyżka', ok: 'Wszystko się zgadza',
+    clients: 'Klientek', sum: 'Suma usług', pay: 'Wynagrodzenie', earned: 'Zarobek', rate: 'Stawka', perHour: 'zł/godz.',
+    revenue: 'Przychód', payroll: 'Wynagrodzenia razem', closedBy: 'Zamknęła', total: 'Razem',
+    edit: 'Zmień', del: 'Usuń', confirmDelete: 'Usunąć ten wpis?', saved: 'Zapisano ✅', deleted: 'Usunięto',
+    empty: 'Brak wpisów', demo: 'Tryb demo: dane przykładowe, nic się nie zapisuje',
+    openInTg: 'Otwórz aplikację przez bota w Telegramie.', demoOwner: 'Demo: właścicielka', demoWorker: 'Demo: pracownica',
+    prevMonth: 'Poprzedni miesiąc', nextMonth: 'Następny miesiąc', locked: 'Zmiany tylko w dniu wpisu',
+    err_auth: 'Nie udało się sprawdzić logowania. Zamknij i otwórz aplikację ponownie.', err_auth_expired: 'Sesja wygasła. Zamknij i otwórz aplikację ponownie.',
+    err_not_registered: 'Nie ma Cię na liście. Przekaż właścicielce swój Telegram ID: {id}', err_forbidden: 'Brak dostępu',
+    err_edit_closed: 'Zmiany możliwe tylko w dniu wpisu. Zwróć się do właścicielki.', err_shift_exists: 'Zmiana na ten dzień już jest. Popraw ją na liście poniżej.',
+    err_cash_exists: 'Kasa na ten dzień jest już zamknięta', err_bad_input: 'Sprawdź wypełnione pola', err_not_found: 'Nie znaleziono wpisu, odśwież stronę',
+    err_network: 'Brak połączenia z serwerem. Sprawdź internet.', err_server_config: 'Serwer nie jest skonfigurowany (BOT_TOKEN)',
+    err_no_sheet: 'W arkuszu brakuje zakładki. Uruchom setup.', err_server: 'Błąd serwera. Spróbuj ponownie.',
+  },
+};
+
+// ---------- Состояние и помощники ----------
+const S = { lang: localStorage.getItem('bg_lang'), me: null, today: '', prices: [], schedule: {}, month: '', data: null, tab: '', edit: null, busy: false };
+const t = (k, p) => { let s = T[S.lang || 'uk'][k] ?? T.uk[k] ?? k; for (const x in p || {}) s = s.replace('{' + x + '}', p[x]); return s; };
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const loc = () => (S.lang === 'pl' ? 'pl-PL' : 'uk-UA');
+const fmt = (n) => Number(n || 0).toLocaleString(loc(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const zl = (n) => fmt(n) + ' zł';
+const hh = (n) => Number(n || 0).toLocaleString(loc(), { maximumFractionDigits: 2 }) + ' ' + t('h');
+const dm = (d) => d.slice(8, 10) + '.' + d.slice(5, 7);
+const num = (v) => { const n = parseFloat(String(v ?? '').replace(',', '.')); return isFinite(n) ? n : 0; };
+const r2 = (n) => Math.round(n * 100) / 100;
+const $ = (id) => document.getElementById(id);
+const warsawToday = () => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Warsaw' }).format(new Date());
+const hoursBetween = (a, b) => r2(((+b.slice(0, 2) * 60 + +b.slice(3, 5)) - (+a.slice(0, 2) * 60 + +a.slice(3, 5))) / 60);
+const signed = (n) => (n > 0 ? '+' : '') + zl(n);
+
+function schedFor(date) {
+  const cell = String(S.schedule[DAYS[new Date(date + 'T12:00:00Z').getUTCDay()]] || '');
+  const m = cell.match(/(\d{1,2}):(\d{2})\s*[-–—]\s*(\d{1,2}):(\d{2})/);
+  return m ? [m[1].padStart(2, '0') + ':' + m[2], m[3].padStart(2, '0') + ':' + m[4]] : null;
+}
+
+async function api(action, data = {}) {
+  if (DEMO) return demoApi(action, JSON.parse(JSON.stringify(data)));
+  let r;
+  try {
+    // text/plain — чтобы браузер не делал CORS preflight, который Apps Script не поддерживает
+    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, data, initData: tg.initData }) });
+    r = await res.json();
+  } catch (e) { throw new Error('network'); }
+  if (!r.ok) throw new Error(r.error);
+  return r.data;
+}
+
+function toast(msg) {
+  const el = $('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+const errText = (code) => (T.uk['err_' + code] ? t('err_' + code) : t('err_server'));
+const confirmBox = (msg) => new Promise((ok) => (IN_TG && tg.showConfirm ? tg.showConfirm(msg, ok) : ok(confirm(msg))));
+
+async function run(fn) {
+  if (S.busy) return;
+  S.busy = true; document.body.classList.add('busy');
+  try { await fn(); } catch (e) { toast(errText(e.message)); } finally { S.busy = false; document.body.classList.remove('busy'); }
+}
+
+// ---------- Запуск ----------
+async function start() {
+  if (tg) { tg.ready(); tg.expand(); }
+  renderLang();
+  if (!IN_TG && !DEMO) return renderOutside();
+  try {
+    const init = await api('init');
+    Object.assign(S, init);
+    S.lang = S.lang || init.me.lang;
+    S.month = init.today.slice(0, 7);
+    S.tab = tabs()[0];
+    await load();
+  } catch (e) {
+    const id = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : '?';
+    $('app').innerHTML = `<div class="card center">${esc(e.message === 'not_registered' ? t('err_not_registered', { id }) : errText(e.message))}</div>`;
+  }
+}
+
+async function load() {
+  S.data = await api(S.me.role === 'owner' ? 'ownerMonth' : 'myMonth', { month: S.month });
+  render();
+}
+
+function tabs() {
+  if (S.me.role === 'owner') return ['overview', 'workers', 'cashList'];
+  return ['shift', ...(S.me.type === 'percent' ? ['services'] : []), 'cash', 'month'];
+}
+const ICON = { shift: '🕘', services: '💆‍♀️', cash: '💶', month: '📊', overview: '📊', workers: '👩', cashList: '💶' };
+
+// ---------- Отрисовка ----------
+function renderLang() {
+  $('lang').innerHTML = ['pl', 'uk'].map((l) => `<button data-lang="${l}" aria-pressed="${(S.lang || 'uk') === l}">${l === 'pl' ? 'PL' : 'UA'}</button>`).join('');
+  document.documentElement.lang = S.lang || 'uk';
+}
+
+function render() {
+  renderLang();
+  if (!S.me) return renderOutside();
+  const nav = $('tabs');
+  nav.hidden = false;
+  nav.innerHTML = tabs().map((k) => `<button data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ''}><span aria-hidden="true">${ICON[k]}</span>${t(k)}</button>`).join('');
+  const monthName = new Date(S.month + '-15T12:00:00Z').toLocaleDateString(loc(), { month: 'long', year: 'numeric' });
+  const bar = `<div class="monthbar"><button data-month="-1" aria-label="${t('prevMonth')}">‹</button><b>${esc(monthName)}</b><button data-month="1" aria-label="${t('nextMonth')}">›</button></div>`;
+  const isForm = ['shift', 'services', 'cash'].includes(S.tab); // у форм сначала ввод, потом месяц и список
+  $('app').innerHTML = (DEMO ? `<p class="demo">${t('demo')}</p>` : '') +
+    (isForm ? VIEWS[S.tab]() + bar : bar + VIEWS[S.tab]()) + (LISTS[S.tab] ? LISTS[S.tab]() : '');
+  if (S.tab === 'shift') updateShift();
+  if (S.tab === 'cash') updateCash();
+}
+
+function renderOutside() {
+  $('tabs').hidden = true;
+  $('app').innerHTML = `<div class="center"><p>${t('openInTg')}</p>
+    <a class="btn ghost" href="?demo=owner">${t('demoOwner')}</a>
+    <a class="btn ghost" href="?demo=worker&name=Marta">${t('demoWorker')}: Marta</a>
+    <a class="btn ghost" href="?demo=worker&name=Natka">${t('demoWorker')}: Natka</a></div>`;
+}
+
+const editing = (kind) => (S.edit && S.edit.kind === kind ? S.edit : null);
+const cancelBtn = (e) => (e ? `<button class="btn ghost" data-act="cancel">${t('cancel')}</button>` : '');
+const dateInput = (v) => `<label>${t('date')}<input type="date" id="f_date" value="${esc(v)}" max="${S.today}" required></label>`;
+const moneyInput = (id, label, v) => `<label>${label}<input id="${id}" type="text" inputmode="decimal" placeholder="0" value="${v ? esc(String(v).replace('.', S.lang === 'pl' ? ',' : '.')) : ''}"></label>`;
+const stat = (label, v, cls = '') => `<div class="stat ${cls}"><div class="sub">${label}</div><div class="v">${v}</div></div>`;
+
+function rows(kind, items, line) {
+  if (!items.length) return `<p class="empty">${t('empty')}</p>`;
+  return '<ul class="list">' + items.map((r) => `<li><div>${line(r)}</div>${r.editable
+    ? `<span><button class="icon" data-act="edit" data-kind="${kind}" data-id="${esc(r.id)}" aria-label="${t('edit')}">✏️</button><button class="icon" data-act="del" data-kind="${kind}" data-id="${esc(r.id)}" aria-label="${t('del')}">🗑</button></span>`
+    : ''}</li>`).join('') + '</ul>';
+}
+
+const VIEWS = {
+  shift() {
+    const e = editing('shifts');
+    return `<section class="card"><h2>${t(e ? 'editShift' : 'newShift')}</h2>${dateInput(e ? e.date : S.today)}
+      <p class="hint" id="sched"></p>
+      <button class="btn big" data-act="shiftSched" id="bySched">${t('workedBySchedule')}</button>
+      <div class="or">${t('ownTime')}</div>
+      <div class="row"><label>${t('start')}<input type="time" id="f_start" value="${e ? esc(e.start) : ''}"></label>
+      <label>${t('end')}<input type="time" id="f_end" value="${e ? esc(e.end) : ''}"></label></div>
+      <p class="hint" id="calcH"></p>
+      <button class="btn" data-act="shift">${t('save')}</button>${cancelBtn(e)}</section>`;
+  },
+  services() {
+    const e = editing('services');
+    const sel = e ? e.service : (S.prices[0] || {}).service;
+    const price = e ? e.price : (S.prices[0] || {}).price;
+    return `<section class="card"><h2>${t(e ? 'editService' : 'newService')}</h2>${dateInput(e ? e.date : S.today)}
+      <label>${t('service')}<select id="f_service">${S.prices.map((p) => `<option ${p.service === sel ? 'selected' : ''}>${esc(p.service)}</option>`).join('')}</select></label>
+      ${moneyInput('f_price', t('price'), price)}
+      <button class="btn" data-act="service">${t('save')}</button>${cancelBtn(e)}</section>`;
+  },
+  cash() {
+    const e = editing('cash') || {};
+    return `<section class="card"><h2>${t(e.id ? 'editCash' : 'newCash')}</h2>${dateInput(e.date || S.today)}
+      <div class="row">${moneyInput('f_cash', t('cashIn'), e.cash)}${moneyInput('f_card', t('card'), e.card)}</div>
+      <div class="row">${moneyInput('f_blik', t('blik'), e.blik)}${moneyInput('f_exp', t('expenses'), e.expenses)}</div>
+      <label>${t('expNote')}<input id="f_note" maxlength="200" value="${esc(e.note || '')}"></label>
+      ${moneyInput('f_actual', t('actual'), e.actual)}
+      <div class="calc"><span>${t('expected')}</span><b id="c_exp"></b></div>
+      <div class="calc"><span>${t('diff')}</span><b id="c_diff"></b></div>
+      <button class="btn" data-act="cash">${t('save')}</button>${cancelBtn(e.id)}</section>`;
+  },
+  month() {
+    const x = S.data.totals, me = S.me;
+    const rate = me.type === 'hourly' ? fmt(me.rate) + ' ' + t('perHour') : me.rate + '%';
+    return `<section class="card"><h2>${esc(me.name)}</h2><div class="stats">
+      ${stat(t('hours'), hh(x.hours))}${me.type === 'percent' ? stat(t('clients'), x.count) + stat(t('sum'), zl(x.sum)) : ''}
+      ${stat(t('rate'), rate)}${stat(t('earned'), zl(x.pay), 'wide')}</div></section>`;
+  },
+  overview() {
+    const x = S.data.totals;
+    const payroll = S.data.workers.reduce((s, w) => s + w.pay, 0);
+    return `<section class="card"><h2>${t('overview')}</h2><div class="stats">
+      ${stat(t('revenue'), zl(x.revenue), 'wide')}${stat(t('cashIn'), zl(x.cash))}${stat(t('card'), zl(x.card))}
+      ${stat(t('blik'), zl(x.blik))}${stat(t('expenses'), zl(x.expenses))}
+      ${stat(t('shortage'), `<span class="${x.shortage < 0 ? 'bad' : ''}">${zl(x.shortage)}</span>`)}${stat(t('surplus'), zl(x.surplus))}
+      ${stat(t('payroll'), zl(payroll), 'wide')}</div></section>`;
+  },
+  workers: () => '',
+  cashList: () => '',
+};
+
+const LISTS = {
+  shift: () => `<section class="card">${rows('shifts', S.data.shifts, (r) => `<b>${dm(r.date)}</b> ${esc(r.start)}–${esc(r.end)}<div class="sub">${hh(r.hours)}${r.bySchedule === 'да' ? ' · ' + t('schedule') : ''}</div>`)}
+    <div class="calc"><span>${t('total')}</span><b>${hh(S.data.totals.hours)}</b></div></section>`,
+  services: () => `<section class="card">${rows('services', S.data.services, (r) => `<b>${dm(r.date)}</b> ${esc(r.service)}<div class="sub">${zl(r.price)}</div>`)}
+    <div class="calc"><span>${t('clients')}: ${S.data.totals.count}</span><b>${zl(S.data.totals.sum)}</b></div>
+    <div class="calc"><span>${t('earned')}</span><b>${zl(S.data.totals.pay)}</b></div></section>`,
+  cash: () => `<section class="card">${rows('cash', S.data.cash, cashLine)}</section>`,
+  workers: () => S.data.workers.map((w) => `<section class="card"><h2>${esc(w.name)}</h2><div class="stats">
+      ${stat(t('hours'), hh(w.hours))}${w.type === 'percent' ? stat(t('clients'), w.count) + stat(t('sum'), zl(w.sum)) : ''}
+      ${stat(t('rate'), w.type === 'hourly' ? fmt(w.rate) + ' ' + t('perHour') : w.rate + '%')}${stat(t('pay'), zl(w.pay), 'wide')}</div></section>`).join(''),
+  cashList: () => `<section class="card">${rows('cash', S.data.cash.map((c) => ({ ...c, editable: false })), cashLine)}</section>`,
+};
+
+function cashLine(c) {
+  const d = num(c.diff);
+  return `<b>${dm(c.date)}</b> · ${esc(c.name)}
+    <div class="sub">${t('cashIn')} ${zl(c.cash)} · ${t('card')} ${zl(c.card)} · BLIK ${zl(c.blik)}</div>
+    ${num(c.expenses) ? `<div class="sub">${t('expenses')}: ${zl(c.expenses)}${c.note ? ' — ' + esc(c.note) : ''}</div>` : ''}
+    <div class="sub">${t('expected')} ${zl(c.expected)} · ${t('actual')} ${zl(c.actual)} ·
+      <b class="${d < 0 ? 'bad' : d > 0 ? 'good' : ''}">${d < 0 ? t('shortage') + ' ' + zl(d) : d > 0 ? t('surplus') + ' ' + signed(d) : t('ok')}</b></div>`;
+}
+
+function updateShift() {
+  const s = schedFor($('f_date').value || S.today);
+  $('sched').textContent = t('schedule') + ': ' + (s ? s.join('–') : t('dayOff'));
+  $('bySched').disabled = !s;
+  const a = $('f_start').value, b = $('f_end').value;
+  $('calcH').textContent = a && b && hoursBetween(a, b) > 0 ? t('hours') + ': ' + hh(hoursBetween(a, b)) : '';
+}
+
+function updateCash() {
+  const exp = r2(num($('f_cash').value) - num($('f_exp').value));
+  const diff = r2(num($('f_actual').value) - exp);
+  $('c_exp').textContent = zl(exp);
+  $('c_diff').textContent = diff < 0 ? t('shortage') + ' ' + zl(diff) : diff > 0 ? t('surplus') + ' ' + signed(diff) : t('ok');
+  $('c_diff').className = diff < 0 ? 'bad' : diff > 0 ? 'good' : '';
+}
+
+// ---------- Действия ----------
+const editId = (kind) => (editing(kind) || {}).id || '';
+const SAVE = {
+  shiftSched: ['saveShift', () => { const date = $('f_date').value, s = schedFor(date) || ['', '']; return { id: editId('shifts'), date, start: s[0], end: s[1], bySchedule: true }; }],
+  shift: ['saveShift', () => ({ id: editId('shifts'), date: $('f_date').value, start: $('f_start').value, end: $('f_end').value, bySchedule: false })],
+  service: ['saveService', () => ({ id: editId('services'), date: $('f_date').value, service: $('f_service').value, price: $('f_price').value })],
+  cash: ['saveCash', () => ({ id: editId('cash'), date: $('f_date').value, cash: $('f_cash').value, card: $('f_card').value, blik: $('f_blik').value,
+    expenses: $('f_exp').value, note: $('f_note').value, actual: $('f_actual').value })],
+};
+
+document.addEventListener('click', async (ev) => {
+  const b = ev.target.closest('button[data-lang],button[data-tab],button[data-month],button[data-act]');
+  if (!b || b.disabled) return;
+  const ds = b.dataset;
+  if (ds.lang) { S.lang = ds.lang; localStorage.setItem('bg_lang', S.lang); return S.me ? render() : (renderLang(), renderOutside()); }
+  if (ds.tab) { S.tab = ds.tab; S.edit = null; return render(); }
+  if (ds.month) {
+    const [y, m] = S.month.split('-').map(Number), d = new Date(Date.UTC(y, m - 1 + Number(ds.month), 1));
+    S.month = d.toISOString().slice(0, 7);
+    return run(load);
+  }
+  const a = ds.act;
+  if (a === 'cancel') { S.edit = null; return render(); }
+  if (a === 'edit') { S.edit = { kind: ds.kind, ...S.data[ds.kind].find((r) => r.id === ds.id) }; render(); return scrollTo(0, 0); }
+  if (a === 'del') {
+    if (!(await confirmBox(t('confirmDelete')))) return;
+    return run(async () => { await api('deleteRecord', { kind: ds.kind, id: ds.id }); S.edit = null; toast(t('deleted')); await load(); });
+  }
+  if (SAVE[a]) return run(async () => { await api(SAVE[a][0], SAVE[a][1]()); S.edit = null; toast(t('saved')); await load(); });
+});
+
+function onField(ev) {
+  if (ev.target.id === 'f_service') { const p = S.prices.find((x) => x.service === ev.target.value); if (p) $('f_price').value = p.price; }
+  if (S.tab === 'shift' && $('f_date')) updateShift();
+  if (S.tab === 'cash' && $('f_cash')) updateCash();
+}
+document.addEventListener('input', onField);
+document.addEventListener('change', onField);
+
+// ---------- Демо-режим (выдуманные данные, без сервера) ----------
+let DB = null;
+function makeDemo() {
+  const today = warsawToday();
+  const workers = { Natka: ['hourly', 31.4, 'uk'], Karina: ['hourly', 31.4, 'uk'], Anastasiia: ['percent', 40, 'uk'], Marta: ['percent', 60, 'pl'], Olha: ['percent', 45, 'uk'] };
+  const sched = {
+    Natka: ['10:00-19:00', '', '14:00-20:00', '09:00-19:30', '09:00-19:30', '09:00-19:30', '08:00-17:00'],
+    Karina: ['10:00-18:00', '09:00-19:30', '09:00-19:30', '09:00-19:30', '09:00-19:30', '09:00-19:30', '08:00-17:00'],
+    Anastasiia: ['', '09:00-19:30', '09:00-19:30', '14:00-19:30', '', '09:00-19:30', '08:00-17:00'],
+    Marta: ['10:00-18:00', '09:30-16:30', '09:00-18:00', '09:00-18:00', '09:00-19:00', '09:00-16:00', '15:00-17:00'],
+    Olha: ['10:00-18:00', '', '', '', '', '', '09:00-17:00'],
+  }; // индекс 0 = воскресенье
+  const prices = [['Head Spa 60 min', 250, 15], ['Head Spa 90 min', 350, 20], ['Manicure hybrydowy', 120, 10], ['Pedicure', 160, 12], ['Brwi: regulacja + henna', 80, 5], ['Rzęsy 2D', 180, 15]];
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const db = { today, workers, sched, prices, shifts: [], services: [], cash: [], n: 0 };
+  const id = () => 'd' + (++db.n);
+  const [y, m] = today.split('-').map(Number);
+  for (let d = new Date(Date.UTC(y, m - 2, 1)); d.toISOString().slice(0, 10) < today; d.setUTCDate(d.getUTCDate() + 1)) {
+    const date = d.toISOString().slice(0, 10), dow = d.getUTCDay(), created = date + ' 20:00';
+    let cashSum = 0, cardSum = 0, blikSum = 0, closer = null;
+    for (const name in workers) {
+      const s = sched[name][dow]; if (!s || rnd() < 0.08) continue;
+      const [a, b] = s.split('-');
+      db.shifts.push({ id: id(), date, name, start: a, end: b, hours: hoursBetween(a, b), bySchedule: 'да', created });
+      closer = closer || name;
+      const hourly = workers[name][0] !== 'percent'; // почасовые клиенток не вносят, но выручку в кассу приносят
+      for (let i = 0, k = (hourly ? 3 : 1) + Math.floor(rnd() * 4); i < k; i++) {
+        const p = prices[Math.floor(rnd() * prices.length)];
+        if (!hourly) db.services.push({ id: id(), date, name, service: p[0], price: p[1], materials: p[2], created });
+        const r = rnd(); if (r < 0.35) cashSum += p[1]; else if (r < 0.85) cardSum += p[1]; else blikSum += p[1];
+      }
+    }
+    if (!closer) continue;
+    const expenses = rnd() < 0.25 ? 35 : 0, expected = cashSum - expenses, diff = rnd() < 0.15 ? -Math.round(rnd() * 30) : 0;
+    db.cash.push({ id: id(), date, name: closer, cash: cashSum, card: cardSum, blik: blikSum, expenses, note: expenses ? 'kawa, ręczniki' : '',
+      expected, actual: expected + diff, diff, created });
+  }
+  return db;
+}
+
+// Повторяет логику Code.gs, чтобы демо вело себя как настоящий сервер.
+async function demoApi(action, d) {
+  DB = DB || makeDemo();
+  const owner = DEMO === 'owner';
+  const name = owner ? 'Owner' : (DB.workers[Q.get('name')] ? Q.get('name') : 'Anastasiia');
+  const rate = (n) => ({ type: DB.workers[n][0], rate: DB.workers[n][1] });
+  const pay = (r, h, sv) => r2(r.type === 'hourly' ? h * r.rate : sv.reduce((s, x) => s + x.price, 0) * r.rate / 100);
+  const sum = (l, k) => r2(l.reduce((s, x) => s + num(x[k]), 0));
+  const can = (r) => owner || (r.name === name && r.created.slice(0, 10) === DB.today);
+  const pub = (l) => l.slice().sort((a, b) => (a.date + a.created < b.date + b.created ? -1 : 1)).map((r) => ({ ...r, editable: can(r) }));
+  const fail = (c) => { throw new Error(c); };
+  const inM = (r) => r.date.slice(0, 7) === d.month;
+  const okDate = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(v) && v <= DB.today ? v : fail('bad_input'));
+  const money = (v) => { const n = Number(String(v || 0).replace(',', '.')); return isFinite(n) && n >= 0 ? r2(n) : fail('bad_input'); };
+  const upsert = (list, vals) => {
+    const stamp = DB.today + ' ' + new Date().toTimeString().slice(0, 5);
+    if (!d.id) return list.push({ id: 'd' + (++DB.n), name, created: stamp, ...vals });
+    const r = list.find((x) => x.id === d.id) || fail('not_found');
+    if (!can(r)) fail('edit_closed');
+    Object.assign(r, vals, { updated: stamp });
+  };
+  switch (action) {
+    case 'init': {
+      const lang = owner ? 'uk' : DB.workers[name][2];
+      const sched = owner ? [] : DB.sched[name];
+      return { me: { name, role: owner ? 'owner' : 'worker', lang, ...(owner ? {} : rate(name)) }, today: DB.today,
+        prices: DB.prices.map((p) => ({ service: p[0], price: p[1] })), schedule: Object.fromEntries(DAYS.map((k, i) => [k, sched[i] || 'выходной'])) };
+    }
+    case 'myMonth': {
+      const mine = (r) => r.name === name && inM(r);
+      const sh = DB.shifts.filter(mine), sv = DB.services.filter(mine), h = sum(sh, 'hours');
+      return { shifts: pub(sh), services: pub(sv), cash: pub(DB.cash.filter(mine)), totals: { hours: h, count: sv.length, sum: sum(sv, 'price'), pay: pay(rate(name), h, sv) } };
+    }
+    case 'ownerMonth': {
+      const cash = DB.cash.filter(inM);
+      const tot = { cash: sum(cash, 'cash'), card: sum(cash, 'card'), blik: sum(cash, 'blik'), expenses: sum(cash, 'expenses'),
+        shortage: r2(cash.reduce((s, c) => s + Math.min(0, c.diff), 0)), surplus: r2(cash.reduce((s, c) => s + Math.max(0, c.diff), 0)) };
+      tot.revenue = r2(tot.cash + tot.card + tot.blik);
+      const workers = Object.keys(DB.workers).map((n) => {
+        const sv = DB.services.filter((r) => r.name === n && inM(r)), h = sum(DB.shifts.filter((r) => r.name === n && inM(r)), 'hours');
+        return { name: n, ...rate(n), hours: h, count: sv.length, sum: sum(sv, 'price'), pay: pay(rate(n), h, sv) };
+      });
+      return { totals: tot, workers, cash: pub(cash) };
+    }
+    case 'saveShift': {
+      const date = okDate(d.date);
+      if (!/^\d{2}:\d{2}$/.test(d.start) || !/^\d{2}:\d{2}$/.test(d.end) || !(hoursBetween(d.start, d.end) > 0)) fail('bad_input');
+      if (DB.shifts.some((r) => r.name === name && r.date === date && r.id !== d.id)) fail('shift_exists');
+      return upsert(DB.shifts, { date, start: d.start, end: d.end, hours: hoursBetween(d.start, d.end), bySchedule: d.bySchedule ? 'да' : 'нет' });
+    }
+    case 'saveService': {
+      const p = DB.prices.find((x) => x[0] === d.service) || fail('bad_input');
+      return upsert(DB.services, { date: okDate(d.date), service: p[0], price: money(d.price), materials: p[2] });
+    }
+    case 'saveCash': {
+      const date = okDate(d.date);
+      if (DB.cash.some((r) => r.date === date && r.id !== d.id)) fail('cash_exists');
+      const c = { date, cash: money(d.cash), card: money(d.card), blik: money(d.blik), expenses: money(d.expenses), note: String(d.note || '').slice(0, 200), actual: money(d.actual) };
+      c.expected = r2(c.cash - c.expenses); c.diff = r2(c.actual - c.expected);
+      return upsert(DB.cash, c);
+    }
+    case 'deleteRecord': {
+      const list = DB[d.kind] || fail('bad_input'), i = list.findIndex((x) => x.id === d.id);
+      if (i < 0) fail('not_found');
+      if (!can(list[i])) fail('edit_closed');
+      list.splice(i, 1); return true;
+    }
+  }
+  fail('bad_input');
+}
+
+start();
+</script>
+</body>
+</html>
